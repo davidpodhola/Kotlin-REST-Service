@@ -25,6 +25,17 @@ import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 import gcc.kt.rest.Greeting
+import graphql.ExecutionResult
+import graphql.GraphQL
+import graphql.schema.GraphQLSchema
+import graphql.schema.idl.SchemaGenerator
+import graphql.schema.StaticDataFetcher
+import graphql.schema.idl.RuntimeWiring.newRuntimeWiring
+import graphql.schema.idl.RuntimeWiring
+import graphql.schema.idl.TypeDefinitionRegistry
+import graphql.schema.idl.SchemaParser
+
+
 
 @Path("/hello")
 @ApplicationPath("/")
@@ -36,6 +47,25 @@ class HelloService : Application() {
     fun sayHello(@PathParam("name") name: String): Greeting {
 
         println("HelloService sayHello called: " + name)
-        return Greeting("Hello", name)
+        return Greeting("Hello", test())
+    }
+
+    fun test(): String {
+        val schema = "type Query{hello: String}"
+
+        val schemaParser = SchemaParser()
+        val typeDefinitionRegistry = schemaParser.parse(schema)
+
+        val runtimeWiring = newRuntimeWiring()
+                .type("Query") { builder -> builder.dataFetcher("hello", StaticDataFetcher("world")) }
+                .build()
+
+        val schemaGenerator = SchemaGenerator()
+        val graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring)
+
+        val build = GraphQL.newGraphQL(graphQLSchema).build()
+        val executionResult = build.execute("{hello}")
+
+        return executionResult.getData<Any>().toString()
     }
 }
