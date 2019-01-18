@@ -32,14 +32,13 @@ class HelloServiceIT {
         // Set up the path to the service
         val port = System.getProperty("liberty.test.port")
         val contextName = System.getProperty("app.context.root")
-        val path = "hello"
-        val person = "Fred"
-        val url = "http://localhost:" + port + "/" + contextName + "/" + path + "/" + person
+        val path = "graphql"
+        val url = "http://localhost:$port/$contextName/$path"
 
         // Make the request
         val client = ClientBuilder.newClient()
         val target = client.target(url)
-        val response = target.request().get()
+        val response = target.request().header("Content-Type", "application/graphql").post(null)
 
         // Test we got an OK response
         assertEquals("Incorrect response code from " + url, 200, response.getStatus())
