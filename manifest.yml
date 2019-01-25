@@ -1,0 +1,7 @@
+---
+applications:
+ - name: Kotlin-REST-service
+   random-route: true
+   path: target/kotlinHello.war
+   memory: 256M
+   instances: 1
